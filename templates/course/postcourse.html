@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block css %}
+
+
+
+{% endblock css %}
+
+
+
+{% block body %}
+
+<div class="jumbotron p-4 p-md-5 text-white rounded bg-dark">
+    <div class="col-md-6 px-0">
+      <h1 class="display-4 font-weight-bold">{{request.user}}</h1>
+      <p class="lead my-3">Hello {{request.user}} This is your course page.You can show and conduct your courses from here.</p>
+    </div>
+      <br>
+      <br>
+      <button type="button" class="btn btn-outline-light" data-toggle="modal" data-target="#courseModal">
+      Create Course
+</button>
+    </div>
+
+<div class="jumbotron p-2 p-md-2 text-white rounded bg-danger">
+  <div class="col-md-6 px-0">
+      <p class="lead ml-5"><a href="#" class="text-white font-weight-bold">Conduct Courses</a></p>
+    </div>
+    </div>
+
+
+
+
+    {% for i in posts %}
+    <div class="container my-4">
+      <div class="card">
+        <h5 class="card-header">{{i.title}}
+          <small>{{i.date.date}}</small>
+          <p class="card-body">{{i.description}}</p>
+          {% if i.image %}
+          <img src="{{i.image.url}}" alt="Image" id='post_img' height=200 weight=100>
+          {% endif %}
+          
+          <hr size='30px'>
+
+          <button class="btn btn-success enroll mr-3" id="{{ i.id }}">
+        {% if i in enrolled_course %}
+            <a href="{% url 'enroll' %}" style="color:white;" id="enrollbtn{{ i.id }}"> Decline </a>
+        {% else %}
+            <a href="{% url 'enroll' %}" style="color:white;" id="enrollbtn{{ i.id }}"> Enroll </a>
+        {% endif %}
+      </button>
+          <button class="btn btn-warning mx-2">Comment</button>
+          {% if request.user == i.user %}
+          <a class="btn btn-danger mx-4 delete" href="{% url 'delcourse' i.id %}"" id="{{i.id }}">Delete</a>
+          {% endif %}
+        </div>
+        </div>
+
+      {% endfor %}
+{% endblock body %}
+
+{% block modals %}
+
+
+<!-- Modal -->
+<div class="modal fade" id="courseModal" tabindex="-1" aria-labelledby="courseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="courseModalLabel">Create your course</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/course/post" method="POST", enctype="multipart/form-data">
+        	{% csrf_token %}
+        	<label for="title">Title : </label>
+        	<input type="text" name='title' id='title'>
+        	<br><br>
+        	<label for="discription">Description : </label>
+        	<textarea name='description' id='description' cols="33" rows="10" placeholder="Write about your course here" class="ml-5"></textarea>
+        	<br><br><br>
+        	<label for="image">Image : </label>
+        	<input type="file" name="image" id="image">
+            <hr size='30'>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="Submit" class="btn btn-primary">Done</button>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock modals %}
+
+{% block js %}
+
+<script src="{% static 'course/js/enroll.js' %}"></script>
+
+{% endblock js %}
+
+
+
+

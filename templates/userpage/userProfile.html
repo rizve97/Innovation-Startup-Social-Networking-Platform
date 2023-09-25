@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block nav_btn1 %}
+{% if request.user == user_obj %}
+  <button type="button" class="btn btn-light ml-4" data-toggle="modal" data-target="#PosterModal">Post</button>
+  <button type="button" class="btn btn-outline-primary ml-4" data-toggle="modal" data-target="#PostModal">Edit</button>
+{% elif connection %}
+  <a type="button" class="btn btn-outline-primary mx-2" id="follow" role="button" href="{% url 'userpage:follow' user_obj.username %}">Unfollow</a>
+{% elif not connection %}
+  <a type="button" class="btn btn-outline-primary mx-2" id="follow" role="button" href="{% url 'userpage:follow' user_obj.username %}">Follow</a>
+{% endif %}
+
+<a href="/logout" class="btn btn-dark ml-4">Sign Out</a>
+
+{% endblock nav_btn1 %}
+
+{% block css %}
+
+    #post_img{
+        width:460;
+        heigt:360;
+    }
+
+    .post_div{
+        width:535px;
+    }
+.userImage
+{
+width:200px;
+height:200px;
+border-radius:50%;
+}
+
+.pst{
+width:350px;
+height:200px;
+margin-bottom:30px;
+}
+
+.info
+{
+padding-top:2%;
+padding-left:3%;
+}
+
+hr
+{
+border-top: 2px solid #000000;
+}
+
+#follow, #edit{
+    color:blue;
+}
+
+#follow:hover, #edit:hover{
+    color:white;
+}
+
+{% endblock css %}
+
+
+{% block body %}
+
+<div id="stories" class="storiesWrapper">
+    <div class="media">
+        <img src="{{userImg.url}}" class="align-self-start mr-3 userImage" alt="...">
+        <div class="media-body info">
+            <p>Follower : {{follower}} Following : {{following}}</p>
+            <p><b>{{bio}}</b></p>
+            <p>{{user_obj.first_name}} {{user_obj.last_name}}<br>{{user_obj.email}}<p>
+        </div>
+    </div>
+    <hr>
+</div>
+
+
+{% for i in posts %}
+<div class='container my-4 post_div' id="{{ i.id }}">
+  <div class="card">
+    <h5 class="card-header">
+      <a href="{% url 'userpage:user_profile' i.user %}" style="color:black;">{{i.user}}</a>
+      <small>{{i.date.date}}</small>
+    </h5>
+    <div class="card-body">
+      <p class="card-text">{{i.caption}}</p>
+      {% if i.image %}
+        <img src="{{i.image.url}}" alt="Image" id='post_img'>
+      {% endif %}
+      <hr size='30px'>
+      <form method="Post" action="slug/comment">
+        {% csrf_token %}
+        <textarea type="text" class="form-control" id="comment_text" name="comment" placeholder="Write comment here"></textarea><br>
+        <button type="submit" class="btn btn-warning" id="sub" name="postid" value="{{i.id}}">Comment</button>
+      </form>
+
+      <button class="btn btn-success like mx-3" id="{{ i.id }}">
+        {% if i in liked_post %}
+            <a href="{% url 'userpage:like_dislike_post' %}" style="color:white;" id="likebtn{{ i.id }}"> Liked </a>
+        {% else %}
+            <a href="{% url 'userpage:like_dislike_post' %}" style="color:white;" id="likebtn{{ i.id }}"> Like </a>
+        {% endif %}
+      </button>
+
+      <a role = "button" class="btn btn-secondary mx-3" href = "{% url 'userpage:showpost' i.id %}" id="{{i.id}}" >Details</a>
+
+      <!-- <a role = "button" class="btn btn-warning " href = "{% url 'userpage:comment' %}" >Comment</a> -->
+      <button  class="btn btn-info mx-3" onclick="myFunction('post{{i.id}}')"> Hide&Seek </button>
+
+      {% if request.user == i.user %}
+      <a class="btn btn-danger delete m3-2" href="{% url 'userpage:delpost' i.id %}" id="{{ i.id }}">Delete</a>
+      {% endif %}
+    </div>
+    
+    <div id='post{{i.id}}' style="display:none">
+      {% for x, val in comments.items %}
+        {% if x == i.id %}
+          {% for reslt in val %}
+            <p><pre>{{reslt.cmnt}} <i>--by <a href="{% url 'userpage:user_profile' reslt.user %}">{{reslt.user}}</a> at <small>{{reslt.dat.time}} {{reslt.dat.date}}</small></i></pre></p>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+
+{% endblock body %}
+
+{% block modals %}
+
+<!-- Modal -->
+<div class="modal fade" id="PostModal" tabindex="-1" role="dialog" aria-labelledby="PostModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="PostModalLabel">Show Time</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="{{ request.user }}/edit" method="post"  enctype="multipart/form-data">
+          {% csrf_token %}
+          <label for="BioInput">Bio</label>
+          <input type="text" class="form-control" id="BioInput" name="Bio">
+          <br>
+          <label for="image">Image : </label>
+          <br>
+          <input type="file" name="image" id="image">
+          <br>
+          <hr>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Change</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="modal fade" id="PosterModal" tabindex="-1" role="dialog" aria-labelledby="PosterModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="PosterModalLabel">Show Time</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/userpage/post" method="POST"  enctype="multipart/form-data">
+          {% csrf_token %}
+          <label for="image">Image : </label>
+          <input type="file" name="image" id="image">
+          <br><br><br>
+          <label for="captions">Captions : </label>
+          <br>
+          <textarea name="captions" id="captions" cols="35" rows="10" placeholder="Oohlala..." class='ml-4'></textarea>
+          <hr size='30'>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Let's Show</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock modals %}
+
+{% block js %}
+
+<script src="{% static 'userpage/js/delete.js' %}"></script>
+<script src="{% static 'userpage/js/like.js' %}"></script>
+
+{% endblock js %}

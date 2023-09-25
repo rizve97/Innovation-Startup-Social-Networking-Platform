@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="container my-4 mx-4">
+{% if searchusers %}
+<h1>Users :</h1>
+{% for u in searchusers %}
+<p><button type="button" class="btn btn-warning"><a style="color: black" href="{% url 'userpage:user_profile' u.username %}">{{u.username}}</a></button></p>
+{% endfor %}
+{% else %}
+<h1>No user found...</h1>
+{% endif %}
+<br><br>
+{%if searchposts%}
+<h1>Posts :</h1>
+{% for p in searchposts %}
+<h5>{{p.caption}} --posted by <a href="{% url 'userpage:user_profile' p.user.username %}">{{p.user.username}}</a> <button type="button" class="btn btn-info"><a style="color: white" href = "{% url 'userpage:showpost' p.id %}" id="{{p.id}}">Details</a></button> </h5>
+{% endfor %}
+{% else %}
+<h1>No post found...</h1>
+{% endif %}
+<br><br>
+{% if searchcourses %}
+<h1>Courses :</h1>
+{% for c in searchcourses %}
+<h5>Course number {{c.id}} : {{c.title}}</h5>
+{% endfor %}
+{% else %}
+<h1>No course found...</h1>
+{% endif %}
+
+{% endblock body %}

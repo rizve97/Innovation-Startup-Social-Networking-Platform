@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block nav_btn1 %}
+<button type="button" class="btn btn-outline-primary ml-4" data-toggle="modal" data-target="#PostModal">
+    Post
+</button>
+
+<a href="/logout" class="btn btn-dark ml-4">Sign Out</a>
+
+{% endblock nav_btn1 %}
+
+{% block css %}
+
+    #post_img{
+        width:460;
+        heigt:360;
+    }
+
+    .post_div{
+        width:535px;
+    }
+
+{% endblock css %}
+
+
+{% block body %}
+
+<div id="stories" class="storiesWrapper"></div>
+
+<div class='container my-4 post_div' id="{{ post.id }}">
+  <div class="card">
+    <h5 class="card-header">
+      <a href="{% url 'userpage:user_profile' post.user %}" style="color:black;">{{post.user}}</a>
+      <small>{{post.date.date}}</small>
+    </h5>
+    <div class="card-body">
+      <p class="card-text">{{post.caption}}</p>
+      {% if post.image %}
+        <img src="{{post.image.url}}" alt="Image" id='post_img'>
+      {% endif %}
+      <hr size='30px'>
+      <form method="Post" action="slug/comment">
+        {% csrf_token %}
+        <textarea type="text" class="form-control" id="comment_text" name="comment" placeholder="Write comment here"></textarea><br>
+        <button type="submit" class="btn btn-warning">Comment</button>
+      </form>
+      
+      <!-- <a role = "button" class="btn btn-warning " href = "{% url 'userpage:comment' %}" >Comment</a> -->
+      <button  class="btn btn-info" onclick="myFunction('post{{post.id}}')"> Hide&Seek </button>
+
+      {% if request.user == post.user %}
+      <a class="btn btn-danger delete mx-3" href="{% url 'userpage:delpost' post.id %}" id="{{ post.id }}">Delete</a>
+      {% endif %}
+    </div>
+    
+    <div id='post{{post.id}}' style="display:none">
+      {% for x, val in comments.items %}
+        {% if x == post.id %}
+          {% for reslt in val %}
+            <p><pre>{{reslt.cmnt}} <i>--by <a href="{% url 'userpage:user_profile' reslt.user %}">{{reslt.user}}</a> at <small>{{reslt.dat.time}} {{reslt.dat.date}}</small></i></pre></p>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock body %}
+
+{% block modals %}
+
+<!-- Modal -->
+<div class="modal fade" id="PostModal" tabindex="-1" role="dialog" aria-labelledby="PostModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="PostModalLabel">Show Time</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/userpage/post" method="POST"  enctype="multipart/form-data">
+          {% csrf_token %}
+          <label for="image">Image : </label>
+          <input type="file" name="image" id="image">
+          <br><br><br>
+          <label for="captions">Captions : </label>
+          <br>
+          <textarea name="captions" id="captions" cols="35" rows="10" placeholder="Oohlala..." class='ml-4'></textarea>
+          <hr size='30'>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Let's Show</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% endblock modals %}
+

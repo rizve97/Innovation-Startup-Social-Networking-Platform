@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h1>Hello {{user}}</h1>
+
+<form method="Post" action="{% url 'message:semessage' request.user %}" enctype="multipart/form-data">
+{% csrf_token %}
+	<input class="form-control mr-sm-2" type="search" placeholder="Receiver Username" aria-label="Search" name="receiver">
+	<textarea type="text" class="form-control" id="message_text" name="message" placeholder="Write your message here" rows="5"></textarea>
+	<label for="image">Image : </label>
+    <input type="file" name="image" id="image"><br>
+	<button type="submit" class="btn btn-warning" id="message">Send</button>
+</form>
+<hr style="border-top: 2px solid #000000;">
+
+<h1>Messages for you</h1>
+{% for rec in recmsg %}
+<p><pre>{{rec.msg}} --Sended by {{rec.sender.username}} at {{rec.dat.time}} {{rec.dat.date}}</pre></p>
+{% if rec.pict %}
+<img src="{{rec.pict.url}}" alt="..." width="460" height="360">
+{% endif %}
+<hr style="border-top: 2px solid #000000;">
+{% endfor %}
+
+<h1>Messages you send</h1>
+{% for sen in senmsg %}
+<p><pre>{{sen.msg}} --Sended to {{sen.reciver.username}} at {{sen.dat.time}} {{sen.dat.date}}</pre></p>
+{% if sen.pict %}
+<img src="{{sen.pict.url}}" alt="..." width="460" height="360">
+{% endif %}
+<hr style="border-top: 2px solid #000000;">
+
+{% endfor %}
+
+{% endblock body %}
